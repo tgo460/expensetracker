@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local database and data files
+*.db
+*.sqlite3
+*.csv
+
+# Streamlit secrets (NEVER commit your secrets file!)
+.streamlit/secrets.toml
+.streamlit/credentials.toml
+
+# Environment variables
+.env
+.env.local
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
