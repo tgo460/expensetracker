@@ -8,6 +8,40 @@ import streamlit as st
 import altair as alt
 
 # ==============================================================================
+# 0. BANK DATA — loaded once from banks.json (single source of truth)
+# ==============================================================================
+_BANKS_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "banks.json")
+
+def _load_bank_data() -> list[dict]:
+    """Loads the bank list from banks.json. Returns empty list on failure."""
+    try:
+        with open(_BANKS_JSON_PATH, encoding="utf-8") as f:
+            return json.load(f).get("banks", [])
+    except Exception:
+        return []
+
+BANK_DATA = _load_bank_data()   # list of {name, type, aliases}
+
+# Flat alias → canonical name dict (used by heuristic parser)
+BANK_ALIAS_MAP: dict[str, str] = {
+    alias.lower(): bank["name"]
+    for bank in BANK_DATA
+    for alias in bank["aliases"]
+}
+
+# Compact one-liner injected into LLM prompt  (token-efficient: ~350 chars typical)
+# Format: "alias=Full Name, alias2=Full Name2, ..."
+# Only primary short abbreviations (first alias per bank) to keep prompt small.
+def _build_prompt_bank_line() -> str:
+    parts = []
+    for bank in BANK_DATA:
+        if bank["aliases"]:
+            parts.append(f"{bank['aliases'][0]}={bank['name']}")
+    return ", ".join(parts)
+
+BANK_PROMPT_LINE: str = _build_prompt_bank_line()
+
+# ==============================================================================
 # 1. STREAMLIT APP CONFIGURATION & THEMING
 # ==============================================================================
 st.set_page_config(
@@ -328,7 +362,9 @@ def parse_with_gemini(user_message: str, api_key: str):
     prompt = f"""
     You are an intelligent financial assistant parser.
     Today's date and time is: {now_str} (Reference date: {today_date}).
-    Known accounts: {known_accounts_str}
+    User's registered accounts: {known_accounts_str}
+
+    Bank abbreviation map (alias=Full Name): {BANK_PROMPT_LINE}
 
     User message: "{user_message}"
 
@@ -337,13 +373,22 @@ def parse_with_gemini(user_message: str, api_key: str):
     2) "income" (adding balance to an account, salary, depositing money, transfer received, top up, etc.)
 
     Return ONLY a valid JSON object with EXACTLY these keys:
-    - "type": (string, either "expense" or "income")
-    - "item": (string, clean descriptive name with typos corrected, e.g., 'Grocery' instead of 'grocessory', 'Monthly Salary', 'Coffee', 'Account Top-up')
-    - "amount": (number/float, positive spend or deposit amount)
-    - "mode": (string, payment method, e.g., 'UPI', 'ATM Withdrawal', 'Credit Card', 'Debit Card', 'Cash', 'Net Banking', 'Bank Transfer', 'Direct Deposit'. Default to 'UPI' or 'Bank Transfer')
-    - "bank": (string, match to known accounts or expand abbreviations like 'bob' -> 'Bank of Baroda', 'sbi' -> 'State Bank of India', 'hdfc' -> 'HDFC Bank', 'icici' -> 'ICICI Bank', 'axis' -> 'Axis Bank', 'kotak' -> 'Kotak Mahindra Bank', 'cash' -> 'Cash / Wallet')
-    - "category": (string: for expense: 'Food & Dining', 'Groceries', 'Shopping', 'Bills & Utilities', 'Travel & Fuel', 'Entertainment', 'Health & Fitness', 'ATM & Cash', 'Education', 'Investment', 'Miscellaneous'; for income: 'Salary', 'Deposit / Top-up', 'Transfer Received', 'Freelance / Business', 'Cashback / Refund', 'Other Income')
-    - "date": (string, format 'YYYY-MM-DD HH:MM'. If 'yesterday', calculate yesterday's date. If no date is mentioned, use '{now_str}')
+    - "type":     (string, either "expense" or "income")
+    - "item":     (string, clean descriptive name with typos corrected,
+                   e.g. 'Grocery' instead of 'grocessory', 'Monthly Salary', 'Coffee')
+    - "amount":   (number/float, positive spend or deposit amount)
+    - "mode":     (string, payment method — 'UPI', 'ATM Withdrawal', 'Credit Card',
+                   'Debit Card', 'Cash', 'Net Banking', 'Bank Transfer', 'Direct Deposit')
+    - "bank":     (string, first try to match the user's registered accounts exactly,
+                   then use the bank abbreviation map above. If cash with no bank, use 'Cash / Wallet'.)
+    - "category": (for expense: 'Food & Dining', 'Groceries', 'Shopping',
+                               'Bills & Utilities', 'Travel & Fuel', 'Entertainment',
+                               'Health & Fitness', 'ATM & Cash', 'Education',
+                               'Investment', 'Miscellaneous'
+                   for income:  'Salary', 'Deposit / Top-up', 'Transfer Received',
+                               'Freelance / Business', 'Cashback / Refund', 'Other Income')
+    - "date":     (string, format 'YYYY-MM-DD HH:MM'. If 'yesterday', use yesterday's date.
+                   If no date mentioned, use '{now_str}'.)
     """
 
     # Approach 1: Try new official google.genai SDK
@@ -398,24 +443,12 @@ def parse_with_heuristic(user_message: str):
     if amount_match:
         amount = float(amount_match.group(1))
 
-    # 3. Extract Bank
-    bank_map = {
-        "bob": "Bank of Baroda",
-        "bank of baroda": "Bank of Baroda",
-        "sbi": "State Bank of India",
-        "state bank": "State Bank of India",
-        "hdfc": "HDFC Bank",
-        "icici": "ICICI Bank",
-        "axis": "Axis Bank",
-        "kotak": "Kotak Mahindra Bank",
-        "pnb": "Punjab National Bank",
-        "paytm": "Paytm Payments Bank",
-        "cash": "Cash / Wallet"
-    }
+    # 3. Extract Bank — uses BANK_ALIAS_MAP loaded from banks.json
     detected_bank = "Other / Not Specified"
-    for code, full_name in bank_map.items():
-        if re.search(rf"\b{code}\b", msg):
-            detected_bank = full_name
+    # Try longest alias first to avoid 'au' matching inside 'audit' etc.
+    for alias in sorted(BANK_ALIAS_MAP.keys(), key=len, reverse=True):
+        if re.search(rf"\b{re.escape(alias)}\b", msg):
+            detected_bank = BANK_ALIAS_MAP[alias]
             break
 
     # 4. Extract Mode

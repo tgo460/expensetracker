@@ -1,0 +1,146 @@
+{
+  "_comment": "Bank abbreviation map — single source of truth for both the LLM prompt and the offline heuristic parser. Keys are lowercase abbreviations/short-forms; values are canonical display names. Add new entries here; the app reloads this file on startup.",
+  "banks": [
+    {
+      "name": "State Bank of India",
+      "type": "Public Sector",
+      "aliases": ["sbi", "state bank", "state bank of india", "statebank"]
+    },
+    {
+      "name": "Bank of Baroda",
+      "type": "Public Sector",
+      "aliases": ["bob", "bank of baroda", "bankofbaroda", "baroda bank"]
+    },
+    {
+      "name": "Punjab National Bank",
+      "type": "Public Sector",
+      "aliases": ["pnb", "punjab national", "punjab national bank"]
+    },
+    {
+      "name": "Bank of India",
+      "type": "Public Sector",
+      "aliases": ["boi", "bank of india"]
+    },
+    {
+      "name": "Canara Bank",
+      "type": "Public Sector",
+      "aliases": ["canara", "canara bank", "canarabank"]
+    },
+    {
+      "name": "Union Bank of India",
+      "type": "Public Sector",
+      "aliases": ["union bank", "ubi", "union bank of india"]
+    },
+    {
+      "name": "Indian Bank",
+      "type": "Public Sector",
+      "aliases": ["indian bank", "indianbank", "ind bank"]
+    },
+    {
+      "name": "Central Bank of India",
+      "type": "Public Sector",
+      "aliases": ["central bank", "cbi", "central bank of india"]
+    },
+    {
+      "name": "HDFC Bank",
+      "type": "Private Sector",
+      "aliases": ["hdfc", "hdfc bank", "hdfcbank"]
+    },
+    {
+      "name": "ICICI Bank",
+      "type": "Private Sector",
+      "aliases": ["icici", "icici bank", "icicibank"]
+    },
+    {
+      "name": "Axis Bank",
+      "type": "Private Sector",
+      "aliases": ["axis", "axis bank", "axisbank", "utm bank"]
+    },
+    {
+      "name": "Kotak Mahindra Bank",
+      "type": "Private Sector",
+      "aliases": ["kotak", "kotak bank", "kotak mahindra", "kotak mahindra bank"]
+    },
+    {
+      "name": "IndusInd Bank",
+      "type": "Private Sector",
+      "aliases": ["indusind", "indusind bank", "indus bank"]
+    },
+    {
+      "name": "Yes Bank",
+      "type": "Private Sector",
+      "aliases": ["yes bank", "yesbank", "yes"]
+    },
+    {
+      "name": "Federal Bank",
+      "type": "Private Sector",
+      "aliases": ["federal bank", "federal", "fed bank"]
+    },
+    {
+      "name": "IDFC First Bank",
+      "type": "Private Sector",
+      "aliases": ["idfc", "idfc first", "idfc bank", "idfc first bank"]
+    },
+    {
+      "name": "RBL Bank",
+      "type": "Private Sector",
+      "aliases": ["rbl", "rbl bank", "ratnakar bank"]
+    },
+    {
+      "name": "Bandhan Bank",
+      "type": "Private Sector",
+      "aliases": ["bandhan", "bandhan bank"]
+    },
+    {
+      "name": "Unity Small Finance Bank",
+      "type": "Small Finance Bank",
+      "aliases": ["unity", "unity bank", "unity small finance", "unity sfd", "small finance unity bank", "unity sf bank", "usf bank", "usfb"]
+    },
+    {
+      "name": "AU Small Finance Bank",
+      "type": "Small Finance Bank",
+      "aliases": ["au bank", "au small finance", "au sfb", "aubank", "au"]
+    },
+    {
+      "name": "Ujjivan Small Finance Bank",
+      "type": "Small Finance Bank",
+      "aliases": ["ujjivan", "ujjivan bank", "ujjivan sfb"]
+    },
+    {
+      "name": "Equitas Small Finance Bank",
+      "type": "Small Finance Bank",
+      "aliases": ["equitas", "equitas bank", "equitas sfb"]
+    },
+    {
+      "name": "ESAF Small Finance Bank",
+      "type": "Small Finance Bank",
+      "aliases": ["esaf", "esaf bank", "esaf sfb"]
+    },
+    {
+      "name": "Paytm Payments Bank",
+      "type": "Payments Bank",
+      "aliases": ["paytm", "paytm bank", "paytmbank"]
+    },
+    {
+      "name": "Airtel Payments Bank",
+      "type": "Payments Bank",
+      "aliases": ["airtel bank", "airtel payments", "airtel payments bank"]
+    },
+    {
+      "name": "India Post Payments Bank",
+      "type": "Payments Bank",
+      "aliases": ["ippb", "india post bank", "post office bank", "post bank"]
+    },
+    {
+      "name": "Cash / Wallet",
+      "type": "Cash",
+      "aliases": ["cash", "wallet", "hand cash", "physical cash", "cash in hand", "cwallet"]
+    },
+    {
+      "name": "GPay / PhonePe",
+      "type": "UPI Wallet",
+      "aliases": ["gpay", "google pay", "phonePe", "phonepe", "phonepe upi"]
+    }
+  ]
+}
+
